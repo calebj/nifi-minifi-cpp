@@ -50,7 +50,7 @@ class ProcessSessionFactory {
   ProcessSessionFactory(const ProcessSessionFactory &parent) = delete;
   ProcessSessionFactory &operator=(const ProcessSessionFactory &parent) = delete;
 
- private:
+ protected:
   // ProcessContext
   std::shared_ptr<ProcessContext> process_context_;
 

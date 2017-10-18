@@ -157,13 +157,13 @@ bool TestPlan::runNextProcessor(std::function<void(const std::shared_ptr<core::P
   location++;
   std::shared_ptr<core::Processor> processor = processor_queue_.at(location);
   std::shared_ptr<core::ProcessContext> context = processor_contexts_.at(location);
-  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<core::ProcessSessionFactory>(context);
+  std::shared_ptr<core::ProcessSessionFactory> factory = std::make_shared<TestSessionFactory>(context);
   factories_.push_back(factory);
   if (std::find(configured_processors_.begin(), configured_processors_.end(), processor) == configured_processors_.end()) {
     processor->onSchedule(context, factory);
     configured_processors_.push_back(processor);
   }
-  std::shared_ptr<core::ProcessSession> current_session = std::make_shared<core::ProcessSession>(context);
+  std::shared_ptr<core::ProcessSession> current_session = std::make_shared<TestSession>(context);
   process_sessions_.push_back(current_session);
   processor->incrementActiveTasks();
   processor->setScheduledState(core::ScheduledState::RUNNING);
@@ -221,3 +221,10 @@ void TestPlan::finalize() {
   finalized = true;
 }
 
+void TestSession::commit()  {
+    _lastUpdatedFlowFiles = _updatedFlowFiles;
+    _lastOriginalFlowFiles = _originalFlowFiles;
+    _lastAddedFlowFiles = _addedFlowFiles;
+    _lastDeletedFlowFiles = _deletedFlowFiles;
+    ProcessSession::commit();
+  }

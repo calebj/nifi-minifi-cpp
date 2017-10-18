@@ -27,6 +27,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <deque>
 #include "core/logging/Logger.h"
 #include "core/Core.h"
 #include "properties/Configure.h"
@@ -290,6 +291,36 @@ class TestController {
   LogTestController &log;
   std::vector<char*> directories;
 
+};
+
+class TestSession : public core::ProcessSession {
+public:
+  TestSession(std::shared_ptr<core::ProcessContext> _process_context = nullptr)
+  : ProcessSession(_process_context) {}
+
+  void commit();
+private:
+  // FlowFiles modified by the last process session
+  std::map<std::string, std::shared_ptr<core::FlowFile> > _lastUpdatedFlowFiles;
+
+  // Copy of the original FlowFiles modified in the last process session as above
+  std::map<std::string, std::shared_ptr<core::FlowFile> > _lastOriginalFlowFiles;
+
+  // FlowFiles added by the last process session
+  std::map<std::string, std::shared_ptr<core::FlowFile> > _lastAddedFlowFiles;
+
+  // FlowFiles deleted in the last process session
+  std::map<std::string, std::shared_ptr<core::FlowFile> > _lastDeletedFlowFiles;
+};
+
+class TestSessionFactory : public core::ProcessSessionFactory {
+public:
+  TestSessionFactory(std::shared_ptr<core::ProcessContext> processContext)
+  : ProcessSessionFactory(processContext) {}
+  
+  std::shared_ptr<core::ProcessSession> createSession() {
+    return std::make_shared<TestSession>(process_context_);
+  }
 };
 
 #endif /* LIBMINIFI_TEST_TESTBASE_H_ */
